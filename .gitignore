@@ -1,0 +1,8 @@
+venv/
+*.db
+.db-journal
+*.db-journal
+*.log
+--pycache--/
+*.pyc
+.ivy2.5.2/
