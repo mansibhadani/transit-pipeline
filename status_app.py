@@ -5,7 +5,6 @@ from datetime import datetime
 app = Flask(__name__)
 
 def get_stats():
-    def get_stats():
     conn = sqlite3.connect('transit.db')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS stop_updates (
@@ -19,18 +18,6 @@ def get_stats():
             received_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    total = conn.execute('SELECT COUNT(*) FROM stop_updates').fetchone()[0]
-    routes = conn.execute('SELECT DISTINCT route_id FROM stop_updates').fetchall()
-    last_record = conn.execute('SELECT received_at FROM stop_updates ORDER BY id DESC LIMIT 1').fetchone()
-    conn.close()
-    return {
-        "status": "live",
-        "total_records": total,
-        "distinct_routes": [r[0] for r in routes],
-        "last_update": last_record[0] if last_record else None,
-        "checked_at": datetime.utcnow().isoformat()
-    }
-    conn = sqlite3.connect('transit.db')
     total = conn.execute('SELECT COUNT(*) FROM stop_updates').fetchone()[0]
     routes = conn.execute('SELECT DISTINCT route_id FROM stop_updates').fetchall()
     last_record = conn.execute('SELECT received_at FROM stop_updates ORDER BY id DESC LIMIT 1').fetchone()
@@ -61,4 +48,4 @@ def status():
     return jsonify(get_stats())
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)
