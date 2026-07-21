@@ -1,0 +1,25 @@
+app = "transit-pipeline"
+primary_region = "iad"
+
+[build]
+
+[mounts]
+  source = "transit_data"
+  destination = "/data"
+
+[processes]
+  app = "python status_app.py"
+  worker = "python cloud_poller.py"
+
+[http_service]
+  internal_port = 5000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
