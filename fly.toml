@@ -6,6 +6,7 @@ primary_region = "iad"
 [mounts]
   source = "transit_data"
   destination = "/data"
+  processes = ["app", "worker"]
 
 [processes]
   app = "python status_app.py"
