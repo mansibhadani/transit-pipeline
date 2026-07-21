@@ -5,7 +5,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 def get_stats():
-    conn = sqlite3.connect('transit.db')
+    conn = sqlite3.connect('/data/transit.db')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS stop_updates (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
