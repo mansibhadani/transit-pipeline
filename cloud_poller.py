@@ -1,6 +1,8 @@
 import requests
 import sqlite3
 import time
+import os
+os.makedirs('/data', exist_ok=True)
 from google.transit import gtfs_realtime_pb2
 
 FEED_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs"

@@ -3,7 +3,7 @@ primary_region = "iad"
 
 [build]
 
-[mounts]
+[[mounts]]
   source = "transit_data"
   destination = "/data"
   processes = ["app", "worker"]

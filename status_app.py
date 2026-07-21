@@ -1,5 +1,7 @@
 from flask import Flask, jsonify
 import sqlite3
+import os
+os.makedirs('/data', exist_ok=True)
 from datetime import datetime
 
 app = Flask(__name__)
