@@ -123,6 +123,66 @@ def home():
 def status():
     return jsonify(get_stats())
 
+@app.route('/dashboard')
+def dashboard():
+    conn = sqlite3.connect(DB_PATH, timeout=10)
+    route_counts = conn.execute('''
+        SELECT route_id, COUNT(*) as cnt
+        FROM stop_updates
+        GROUP BY route_id
+        ORDER BY cnt DESC
+        LIMIT 15
+    ''').fetchall()
+    total = conn.execute('SELECT COUNT(*) FROM stop_updates').fetchone()[0]
+    conn.close()
+
+    labels = [r[0] for r in route_counts]
+    values = [r[1] for r in route_counts]
+
+    return f'''
+    <html>
+    <head>
+        <title>Transit Pipeline Dashboard</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+        <style>
+            body {{ font-family: monospace; background: #111; color: #0f0; padding: 40px; }}
+            h1 {{ color: #0ff; }}
+            .stat {{ font-size: 24px; margin-bottom: 20px; }}
+            canvas {{ background: #1a1a1a; border-radius: 8px; padding: 20px; max-width: 800px; }}
+        </style>
+    </head>
+    <body>
+        <h1>Live Transit Data Pipeline</h1>
+        <div class="stat">Total records: {total:,}</div>
+        <canvas id="routeChart"></canvas>
+        <script>
+            const ctx = document.getElementById('routeChart');
+            new Chart(ctx, {{
+                type: 'bar',
+                data: {{
+                    labels: {labels},
+                    datasets: [{{
+                        label: 'Records per route',
+                        data: {values},
+                        backgroundColor: '#0f0'
+                    }}]
+                }},
+                options: {{
+                    scales: {{
+                        y: {{ ticks: {{ color: '#0f0' }} }},
+                        x: {{ ticks: {{ color: '#0f0' }} }}
+                    }},
+                    plugins: {{
+                        legend: {{ labels: {{ color: '#0f0' }} }}
+                    }}
+                }}
+            }});
+        </script>
+        <p><a href="/status" style="color: #0ff;">View raw JSON</a></p>
+    </body>
+    </html>
+    '''
+
 @app.route('/health')
 def health():
     conn = sqlite3.connect(DB_PATH, timeout=10)
