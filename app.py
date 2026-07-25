@@ -15,7 +15,8 @@ os.makedirs('/data', exist_ok=True)
 app = Flask(__name__)
 
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
+	conn.execute('PRAGMA journal_mode=WAL;')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS stop_updates (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,7 +46,8 @@ def fetch_feed():
 def store_updates(feed):
     if feed is None:
         return
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
+	conn.execute('PRAGMA journal_mode=WAL;')
     cursor = conn.cursor()
     count = 0
     feed_timestamp = feed.header.timestamp
@@ -77,7 +79,8 @@ def poller_loop():
         time.sleep(30)
 
 def get_stats():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
+	conn.execute('PRAGMA journal_mode=WAL;')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS stop_updates (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
