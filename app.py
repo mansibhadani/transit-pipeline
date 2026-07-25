@@ -1,3 +1,4 @@
+
 import requests
 import sqlite3
 import time
@@ -16,7 +17,7 @@ app = Flask(__name__)
 
 def init_db():
     conn = sqlite3.connect(DB_PATH, timeout=10)
-	conn.execute('PRAGMA journal_mode=WAL;')
+    conn.execute('PRAGMA journal_mode=WAL;')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS stop_updates (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,7 +48,7 @@ def store_updates(feed):
     if feed is None:
         return
     conn = sqlite3.connect(DB_PATH, timeout=10)
-	conn.execute('PRAGMA journal_mode=WAL;')
+    conn.execute('PRAGMA journal_mode=WAL;')
     cursor = conn.cursor()
     count = 0
     feed_timestamp = feed.header.timestamp
@@ -80,7 +81,7 @@ def poller_loop():
 
 def get_stats():
     conn = sqlite3.connect(DB_PATH, timeout=10)
-	conn.execute('PRAGMA journal_mode=WAL;')
+    conn.execute('PRAGMA journal_mode=WAL;')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS stop_updates (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -121,6 +122,21 @@ def home():
 @app.route('/status')
 def status():
     return jsonify(get_stats())
+
+@app.route('/health')
+def health():
+    conn = sqlite3.connect(DB_PATH, timeout=10)
+    last = conn.execute('SELECT received_at FROM stop_updates ORDER BY id DESC LIMIT 1').fetchone()
+    conn.close()
+    if not last:
+        return jsonify({"healthy": False, "reason": "no data yet"}), 503
+    last_time = datetime.strptime(last[0], '%Y-%m-%d %H:%M:%S')
+    seconds_since = (datetime.utcnow() - last_time).total_seconds()
+    healthy = seconds_since < 90
+    return jsonify({
+        "healthy": healthy,
+        "seconds_since_last_update": seconds_since
+    }), (200 if healthy else 503)
 
 if __name__ == '__main__':
     thread = threading.Thread(target=poller_loop, daemon=True)
